@@ -1,4 +1,4 @@
-from src.utils.metafeature_utils import size, endogenous_mean
+from src.utils.metafeature_utils import size, endogenous_mean, maxminvar, adf
 
 import pandas as pd
 
@@ -26,7 +26,7 @@ class MetaSample:
     @property
     def metafeatures(self):
         if not self._metafeatures:
-            metafeature_functions = [size, endogenous_mean]
+            metafeature_functions = [size, endogenous_mean, maxminvar, adf]
             self._metafeatures = pd.Series(
                 data=[calc(self.time_series) for calc in metafeature_functions],
                 index=[calc.__name__ for calc in metafeature_functions]

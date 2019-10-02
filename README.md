@@ -84,8 +84,9 @@ cd autoxgb
 export VENV_yPATH="../autoxgb_venv"
 virtualenv -p python3 $VENV_PATH
 source ../autoxgb_venv/bin/activate
-<INSTALL COMMAND>
 pip3 install -r requirements.txt
+<INSTALL COMMAND>
+pip install -e .
 pip freeze > requirements.txt
 export KERNEL_NAME="autoxgb_kernel"
 export DISPLAY_NAME="AutoXGB Notebook"
