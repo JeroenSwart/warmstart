@@ -8,10 +8,15 @@
       <w>hyperopt</w>
       <w>hyperparameter</w>
       <w>hyperparameters</w>
+      <w>metadataset</w>
       <w>metafeature</w>
       <w>metafeatures</w>
+      <w>metalearner</w>
+      <w>metasample</w>
       <w>metasamples</w>
       <w>walltime</w>
+      <w>warmstart</w>
+      <w>warmstarter</w>
     </words>
   </dictionary>
 </component>

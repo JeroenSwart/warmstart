@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from hyperopt import hp, tpe, fmin,  STATUS_OK, Trials, rand
+from hyperopt.fmin import generate_trials_to_calculate
 
 
 class Config:
@@ -24,7 +25,7 @@ class Config:
 class BayesianHopt:
     """Bayesian hyperparameter optimization"""
 
-    def __init__(self, identifier, search_space, objective, max_evals, algo):
+    def __init__(self, identifier, search_space, objective, max_evals, algo='tpe', warmstarter=None):
         """Initializes Bayesian hyperparameter optimization instance."""
         self._identifier = identifier
         self._search_space = search_space
@@ -34,6 +35,7 @@ class BayesianHopt:
             self._algo = tpe.suggest
         elif algo == 'random':
             self._algo = rand.suggest
+        self._warmstarter = warmstarter
         self.results = None
 
     @property
@@ -62,16 +64,24 @@ class BayesianHopt:
 
         return {'loss': result, 'status': STATUS_OK, 'walltime': walltime, 'crossval': crossval, 'params': real_params}
 
-    def run_bayesian_hopt(self, show_progressbar=True):
+
+    def run_bayesian_hopt(self, time_series=None, show_progressbar=True):
         """Runs the Bayesian hyperparameter optimization."""
 
         # Create trials object to store information on optimization process
-        trials = Trials()
+        if self._warmstarter:
+            warmstart_configs = self._warmstarter.suggest(time_series)
+            real_space = self.get_numpy_space()
+            unit_params = [{key: np.abs(real_space[key]-config[key]).argmin() for key in real_space.keys()} for config in warmstart_configs]
+            trials = generate_trials_to_calculate(unit_params)
+            hyperopt_evals = self.max_evals - len(warmstart_configs)
+        else:
+            trials = Trials()
+            hyperopt_evals = self.max_evals
 
         # Create the hyperopt format arguments
         space = self._search_space
         hyperopt_space = {key: hp.quniform(key, 1, space[key].granularity, 1) for key in list(space.keys())}
-        hyperopt_evals = self.max_evals # -len(warmstart_configs)
 
         # Run the hyperopt optimization
         fmin(

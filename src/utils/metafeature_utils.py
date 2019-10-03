@@ -1,4 +1,4 @@
-from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.stattools import adfuller, acf
 
 
 def size(time_series):

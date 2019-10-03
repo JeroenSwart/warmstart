@@ -38,7 +38,7 @@ scikit-learn==0.21.3
 scipy==1.3.1
 six==1.12.0
 sklearn==0.0
--e git+https://github.com/JeroenSwart/autoxgb@190bebe0b878b813d4584e8ce89ae621169489ae#egg=src
+-e git+https://github.com/JeroenSwart/autoxgb@c2a6929758f036f4fd1bd9f5e28bbdb250b9247c#egg=src
 statsmodels==0.10.1
 tornado==6.0.3
 tqdm==4.35.0

@@ -1,11 +1,12 @@
 from src.utils.metafeature_utils import size, endogenous_mean, maxminvar, adf, cumac
 
 import pandas as pd
+from tqdm import tqdm
 
 
 class MetaSample:
 
-    def __init__(self, identifier, time_series, results):
+    def __init__(self, identifier, time_series, results=None):
         self._identifier = identifier
         self._time_series = time_series
         self._results = results
@@ -25,7 +26,7 @@ class MetaSample:
 
     @property
     def metafeatures(self):
-        if not self._metafeatures:
+        if self._metafeatures is None:
             metafeature_functions = [size, endogenous_mean, maxminvar, adf, cumac]
             self._metafeatures = pd.Series(
                 data=[calc(self.time_series) for calc in metafeature_functions],
@@ -43,3 +44,16 @@ class MetaDataset:
 
     def __init__(self, metasamples):
         self.metasamples = metasamples
+        self.metafeature_set = pd.DataFrame(
+            data=[metasample.metafeatures for metasample in tqdm(self.metasamples, desc='Calculate metafeatures of metasamples')],
+            index=[metasample.identifier for metasample in self.metasamples]
+        )
+
+    # @property
+    # def metafeature_set(self):
+    #     if self._metafeature_set is None:
+    #         self._metafeature_set = pd.DataFrame(
+    #             data=[metasample.metafeatures for metasample in tqdm(self.metasamples, desc='Calculate metafeatures of metasamples')],
+    #             index=[metasample.identifier for metasample in self.metasamples]
+    #         )
+    #     return self._metafeature_set
