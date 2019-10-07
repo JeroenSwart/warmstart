@@ -48,12 +48,3 @@ class MetaDataset:
             data=[metasample.metafeatures for metasample in tqdm(self.metasamples, desc='Calculate metafeatures of metasamples')],
             index=[metasample.identifier for metasample in self.metasamples]
         )
-
-    # @property
-    # def metafeature_set(self):
-    #     if self._metafeature_set is None:
-    #         self._metafeature_set = pd.DataFrame(
-    #             data=[metasample.metafeatures for metasample in tqdm(self.metasamples, desc='Calculate metafeatures of metasamples')],
-    #             index=[metasample.identifier for metasample in self.metasamples]
-    #         )
-    #     return self._metafeature_set
