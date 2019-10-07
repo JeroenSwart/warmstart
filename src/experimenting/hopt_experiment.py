@@ -1,5 +1,6 @@
+import multiprocessing
 import pandas as pd
-from tqdm import tqdm
+from p_tqdm import p_umap
 
 
 class HoptExperiment:
@@ -8,9 +9,9 @@ class HoptExperiment:
         self._duplicates = duplicates
         self.results = None
 
-    def run_hopt_experiment(self, time_series):
+    def run_hopt_experiment(self, time_series=None, num_processes=multiprocessing.cpu_count()):
 
-        results = [[hopt.run_bayesian_hopt(time_series, show_progressbar=False) for i in tqdm(range(self._duplicates), desc=hopt.identifier + ' duplicates')] for hopt in self._hopts]
+        results = [p_umap(hopt.run_bayesian_hopt, [time_series]*self._duplicates, [False]*self._duplicates, num_cpus=num_processes) for hopt in self._hopts]
 
         df = [item['results']['loss'] for sublist in results for item in sublist]
         indices = pd.MultiIndex.from_product(

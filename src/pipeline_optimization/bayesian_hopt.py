@@ -66,7 +66,6 @@ class BayesianHopt:
 
         return {'loss': result, 'status': STATUS_OK, 'walltime': walltime, 'crossval': crossval, 'params': real_params}
 
-
     def run_bayesian_hopt(self, time_series=None, show_progressbar=True):
         """Runs the Bayesian hyperparameter optimization."""
 
