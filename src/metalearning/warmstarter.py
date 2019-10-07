@@ -30,13 +30,11 @@ class Warmstarter:
 
         # calculate similarities
         sims = cdist(st_metafeature_set, pd.DataFrame(st_metafeature_sample).T, metric='euclidean')
-        print(sims)
+        drop_index = self._metadataset.metafeature_set.index[np.where(sims == 0)[0]]
+        metafeature_train_set = self._metadataset.metafeature_set.drop(drop_index)
 
         # get hyperparameters of this most similar dataset
-        similar_identifier = self._metadataset.metafeature_set.index[int(np.where(sims == sims.min())[0])]
+        similar_identifier = metafeature_train_set.index[int(np.where(sims == sims.min())[0])]
         warmstart_configs = [sample.get_best_hyperparameters(self._nr_configs) for sample in self._metadataset.metasamples if sample.identifier == similar_identifier][0]
-        print('The most similar dataset is: ' + similar_identifier)
-        print('Suggesting the following hyperparameters:')
-        print(warmstart_configs)
 
         return warmstart_configs

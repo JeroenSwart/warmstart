@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+
+from functools import partial
 from hyperopt import hp, tpe, fmin,  STATUS_OK, Trials, rand
 from hyperopt.fmin import generate_trials_to_calculate
 
@@ -25,14 +27,14 @@ class Config:
 class BayesianHopt:
     """Bayesian hyperparameter optimization"""
 
-    def __init__(self, identifier, search_space, objective, max_evals, algo='tpe', warmstarter=None):
+    def __init__(self, identifier, search_space, objective, max_evals, algo='tpe', nr_random_starts=20, warmstarter=None):
         """Initializes Bayesian hyperparameter optimization instance."""
         self._identifier = identifier
         self._search_space = search_space
         self._objective = objective
         self.max_evals = max_evals
         if algo == 'tpe':
-            self._algo = tpe.suggest
+            self._algo = partial(tpe.suggest, n_startup_jobs=nr_random_starts)
         elif algo == 'random':
             self._algo = rand.suggest
         self._warmstarter = warmstarter
@@ -72,7 +74,7 @@ class BayesianHopt:
         if self._warmstarter:
             warmstart_configs = self._warmstarter.suggest(time_series)
             real_space = self.get_numpy_space()
-            unit_params = [{key: np.abs(real_space[key]-config[key]).argmin() for key in real_space.keys()} for config in warmstart_configs]
+            unit_params = [{key: np.abs(real_space[key]-config[key]).argmin()+1 for key in real_space.keys()} for config in warmstart_configs]
             trials = generate_trials_to_calculate(unit_params)
             hyperopt_evals = self.max_evals - len(warmstart_configs)
         else:
