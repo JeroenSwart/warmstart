@@ -34,3 +34,19 @@ def thesis_search_space():
         'subsample': Config(scope=[0.5, 1.0], granularity=3, rounding=2)
     }
     return search_space
+
+
+def get_standard_dataset(dataset_name):
+
+    # load data
+    df = pd.read_csv('../../data/timeseries/raw/final_data.csv', index_col=0)
+
+    # select the dataset
+    split_name = dataset_name.split("_")
+    end_name = split_name[0] + '_target_' + split_name[1]
+    ex_name = split_name[0] + '_temp_' + split_name[1]
+    time_based_features = ['Hour of Day', 'Day of Week', 'Day of Year', 'Holiday']
+    data = df[[end_name, ex_name] + time_based_features].rename(columns={end_name: 'endogenous', ex_name: 'exogenous'})
+    dataset = data.dropna(subset=['endogenous'])[:int(split_name[2])]
+
+    return dataset
