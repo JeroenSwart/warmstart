@@ -20,7 +20,6 @@ class Warmstarter:
         return self._nr_configs
 
     def suggest(self, time_series):
-
         # make a metasample
         target_sample = MetaSample('target', time_series)
 
@@ -30,11 +29,14 @@ class Warmstarter:
 
         # calculate similarities
         sims = cdist(st_metafeature_set, pd.DataFrame(st_metafeature_sample).T, metric='euclidean')
-        drop_index = self._metadataset.metafeature_set.index[np.where(sims == 0)[0]]
-        metafeature_train_set = self._metadataset.metafeature_set.drop(drop_index)
+        sims_df = pd.DataFrame(data=sims, index=self._metadataset.metafeature_set.index)
 
-        # get hyperparameters of this most similar dataset
-        similar_identifier = metafeature_train_set.index[int(np.where(sims == sims.min())[0])]
+        # remove 100% similar dataset from the samples to choose from
+        drop_index = self._metadataset.metafeature_set.index[np.where(sims == 0)[0]]
+        sims_diff = sims_df.drop(drop_index)
+
+        # get hyperparameters of most similar dataset
+        similar_identifier = sims_diff.idxmin().values[0]
         warmstart_configs = [sample.get_best_hyperparameters(self._nr_configs) for sample in self._metadataset.metasamples if sample.identifier == similar_identifier][0]
 
         return warmstart_configs
