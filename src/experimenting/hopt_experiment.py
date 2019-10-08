@@ -8,12 +8,9 @@ class HoptExperiment:
         self._duplicates = duplicates
         self.results = None
 
-    def run_hopt_experiment(self, time_series, show_progressbar=True):
+    def run_hopt_experiment(self, time_series):
 
-        if show_progressbar:
-            results = [[hopt.run_bayesian_hopt(time_series, show_progressbar=False) for i in tqdm(range(self._duplicates), desc=hopt.identifier + ' duplicates')] for hopt in self._hopts]
-        else:
-            results = [[hopt.run_bayesian_hopt(time_series, show_progressbar=False) for i in range(self._duplicates)] for hopt in self._hopts]
+        results = [[hopt.run_bayesian_hopt(time_series, show_progressbar=False) for i in tqdm(range(self._duplicates), desc=hopt.identifier + ' duplicates')] for hopt in self._hopts]
 
         df = [item['results']['loss'] for sublist in results for item in sublist]
         indices = pd.MultiIndex.from_product(

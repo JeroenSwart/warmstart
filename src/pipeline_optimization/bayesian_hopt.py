@@ -70,6 +70,11 @@ class BayesianHopt:
     def run_bayesian_hopt(self, time_series=None, show_progressbar=True):
         """Runs the Bayesian hyperparameter optimization."""
 
+        time_series = pd.DataFrame(time_series)
+
+        if time_series.empty and self._warmstarter:
+            raise ValueError('A warmstart requires an input time series to derive a suggestion from.')
+
         # Create trials object to store information on optimization process
         if self._warmstarter:
             warmstart_configs = self._warmstarter.suggest(time_series)

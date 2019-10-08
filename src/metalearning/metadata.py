@@ -27,7 +27,7 @@ class MetaSample:
     @property
     def metafeatures(self):
         if self._metafeatures is None:
-            metafeature_functions = [size, endogenous_mean, maxminvar, adf, cumac]
+            metafeature_functions = [size, cumac]
             self._metafeatures = pd.Series(
                 data=[calc(self.time_series) for calc in metafeature_functions],
                 index=[calc.__name__ for calc in metafeature_functions]

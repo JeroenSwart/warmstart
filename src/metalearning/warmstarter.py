@@ -20,6 +20,7 @@ class Warmstarter:
         return self._nr_configs
 
     def suggest(self, time_series):
+
         # make a metasample
         target_sample = MetaSample('target', time_series)
 
