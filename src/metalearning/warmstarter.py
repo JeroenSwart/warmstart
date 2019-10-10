@@ -7,9 +7,10 @@ from src.metalearning.metadata import MetaSample
 
 class Warmstarter:
 
-    def __init__(self, metadataset, nr_configs=1):
+    def __init__(self, metadataset, nr_configs=1, cold=False):
         self._metadataset = metadataset
         self._nr_configs = nr_configs
+        self._cold = cold
 
     @property
     def metadataset(self):
@@ -37,7 +38,10 @@ class Warmstarter:
         sims_diff = sims_df.drop(drop_index)
 
         # get hyperparameters of most similar dataset
-        similar_identifier = sims_diff.idxmin().values[0]
+        if not self._cold:
+            similar_identifier = sims_diff.idxmin().values[0]
+        else:
+            similar_identifier = sims_diff.idxmax().values[0]
         warmstart_configs = [sample.get_best_hyperparameters(self._nr_configs) for sample in self._metadataset.metasamples if sample.identifier == similar_identifier][0]
 
         return warmstart_configs
