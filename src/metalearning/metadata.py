@@ -39,6 +39,10 @@ class MetaSample:
         best_configs = [best_configs_df.iloc[i].to_dict() for i in range(nr_best)]
         return best_configs
 
+    def get_best_performance(self):
+        best_perf = self.results.sort_values(by=[('diagnostics', 'mae')]).iloc[0][('diagnostics', 'mae')]
+        return best_perf
+
 
 class MetaDataset:
 
