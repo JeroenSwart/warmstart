@@ -31,7 +31,7 @@ class BayesianHopt:
         """Initializes Bayesian hyperparameter optimization instance."""
         self._identifier = identifier
         self._search_space = search_space
-        self._objective = objective
+        self.objective = objective
         self.max_evals = max_evals
         if algo == 'tpe':
             self._algo = partial(tpe.suggest, n_startup_jobs=nr_random_starts)
@@ -62,10 +62,9 @@ class BayesianHopt:
         real_params = {key: real_space[key][int(unit_params[key]-1)] for key in self._search_space.keys()}
 
         # perform evaluation
-        result, walltime, crossval = self._objective(real_params)
+        result, walltime, crossval = self.objective(real_params)
 
         return {'loss': result, 'status': STATUS_OK, 'walltime': walltime, 'crossval': crossval, 'params': real_params}
-
 
     def run_bayesian_hopt(self, time_series=None, show_progressbar=True):
         """Runs the Bayesian hyperparameter optimization."""
