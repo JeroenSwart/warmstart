@@ -1,4 +1,6 @@
 import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from tqdm import tqdm
 
 
@@ -8,37 +10,42 @@ class HoptExperiment:
         self._duplicates = duplicates
         self._metadataset = metadataset
         self._objective = objective
+        self._best_so_far = pd.DataFrame()
         self.results = None
-        self.best_so_far = None
 
-        # todo: add lazy property, calculating best_so_far AND change visualizer functions, no need to calculate there anymore :)
-        # form = result.unstack(0).unstack(1)
-        # best_lists = [[form.iloc[j][:i + 1].min() for i in form.columns] for j in range(len(form))]
-        # best_so_far = pd.DataFrame(data=best_lists, columns=form.columns, index=form.index).stack(0).unstack([0, 2])
-        # data = best_so_far.stack(1).rank(axis=1).mean(level='iterations')
+    @property
+    def best_so_far(self):
+        if self._best_so_far.empty:
+            best_so_far = []
+            target_ids = self.results.columns.levels[0].values
+            for sample_name in target_ids:
+                form = self.results[sample_name].unstack([0, 1]).unstack(2)
+                best_lists = [[form.iloc[j][:i + 1].min() for i in form.columns] for j in range(len(form))]
+                best_so_far.append(
+                    pd.DataFrame(data=best_lists, columns=form.columns, index=form.index).stack(0).unstack(0))
+            self._best_so_far = pd.concat(best_so_far, keys=target_ids, axis=1)
+        return self._best_so_far
 
-    # todo: choice: input target_ids + metadataset attribute OR no metadataset attribute, test that all are equal and retrieve from a sample
     def run_hopt_experiment(self, target_ids):
 
         results = []
-
+        samples = [sample for sample in self._metadataset.metasamples if sample.identifier in target_ids]
         if len(target_ids) > 1:
-            target_ids = tqdm(target_ids, desc='Target time series')
+            samples = tqdm(samples, desc='Target time series')
 
-        for i, dataset_name in enumerate(target_ids):
+        for i, sample in enumerate(samples):
 
-            metasample = next((sample for sample in self._metadataset.metasamples if sample.identifier == dataset_name), None)
-            time_series = metasample.time_series
+            time_series = sample.time_series
 
-            for i in range(len(self._hopts)):
-                self._hopts[i].objective = self._objective(dataset_name)
+            for j in range(len(self._hopts)):
+                self._hopts[j].objective = self._objective(sample.identifier)
 
             # run bayesian optimizations
             if len(target_ids) == 1:
-                sample_results = [[hopt.run_bayesian_hopt(time_series, show_progressbar=False) for i in
+                sample_results = [[hopt.run_bayesian_hopt(time_series, show_progressbar=False) for n in
                                   tqdm(range(self._duplicates), desc=hopt.identifier + ' duplicates')] for hopt in self._hopts]
             elif len(target_ids) > 1:
-                sample_results = [[hopt.run_bayesian_hopt(time_series, show_progressbar=False) for i in range(self._duplicates)]
+                sample_results = [[hopt.run_bayesian_hopt(time_series, show_progressbar=False) for n in range(self._duplicates)]
                                  for hopt in self._hopts]
 
             # transform to a readable result
@@ -53,7 +60,78 @@ class HoptExperiment:
             # append to results
             results.append(sample_results)
 
-        self.results = results
+        self.results = pd.concat(results, keys=target_ids, axis=1).stack(2)
+
         # todo: now we have to make sure that a mean is taken, s.t. all the visualizers work again
 
-        return results
+    def visualize_avg_ranks(self):
+
+        fig = go.Figure()
+
+        data = self.best_so_far.stack(0).rank(axis=1).mean(level='iterations')
+
+        for identifier in [hopt.identifier for hopt in self._hopts]:
+            fig.add_trace(go.Scatter(y=data[identifier], name=identifier))
+
+        fig.update_layout(
+            xaxis=go.layout.XAxis(title='Iterations'),
+            yaxis=go.layout.YAxis(title='Rank')
+        )
+
+        fig.show()
+
+    def visualize_avg_performance(self, sample_id):
+
+        fig = go.Figure()
+
+        # transform to best so far dataframe
+        data = self.best_so_far[sample_id].mean(level='iterations')
+
+        for identifier in [hopt.identifier for hopt in self._hopts]:
+            fig.add_trace(go.Scatter(y=data[identifier], name=identifier))
+
+        fig.update_layout(
+            xaxis=go.layout.XAxis(title='Iterations'),
+            yaxis=go.layout.YAxis(title='MAE')
+        )
+
+        fig.show()
+
+    def visualize_performance_heatmap(self, sample_id):
+
+        hopt_ids = [hopt.identifier for hopt in self._hopts]
+        result = self.results[sample_id]
+
+        fig = make_subplots(rows=1, cols=len(hopt_ids), subplot_titles=hopt_ids)
+
+        for j, hopt_id in enumerate(hopt_ids):
+            data = result[hopt_id]
+            x = list(data.index.levels[1]) * self._duplicates
+            y = data.values
+            fig.add_trace(go.Histogram2dContour(x=x, y=y, name=hopt_id), row=1, col=j + 1)
+
+        fig.update_yaxes(title_text="Mean squared error")
+        fig.update_xaxes(title_text="Iterations")
+
+        fig.show()
+
+    def visualize_perf_distribution(self, sample_id, iterations):
+
+        fig = go.Figure()
+
+        data = self.results[sample_id].unstack(0).iloc[iterations].stack(1)
+
+        for identifier in data.columns:
+            fig.add_trace(go.Box(
+                y=data[identifier],
+                name=identifier,
+                boxpoints='all',
+                jitter=0.5,
+                whiskerwidth=0.2,
+                marker_size=3,
+                line_width=1
+            ))
+
+        fig.update_layout(yaxis=go.layout.YAxis(title='MAE'), showlegend=False)
+
+        fig.show()
