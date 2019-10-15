@@ -135,3 +135,22 @@ class HoptExperiment:
         fig.update_layout(yaxis=go.layout.YAxis(title='MAE'), showlegend=False)
 
         fig.show()
+
+    def visualize_walltime_comparison(self, base_search, iterations):
+        target_hopt_ids = [hopt.identifier for hopt in self._hopts]
+        target_hopt_ids.remove(base_search)
+        fig = go.Figure()
+        for target_hopt in target_hopt_ids:
+            drop_rs_df = self.best_so_far.stack(0).drop(columns=[base_search])
+            hopt_iterations = []
+            for target_sample in self.results.columns.levels[0]:
+                mean_single_search = self.best_so_far.unstack(1)[(target_sample, base_search, iterations - 1)].mean()
+                for duplicate in range(self._duplicates):
+                    one_search = drop_rs_df.unstack([0, 2])[(target_hopt, duplicate, target_sample)]
+                    if one_search.tail(1).squeeze() > mean_single_search:
+                        hopt_iterations.append(iterations-1)
+                    else:
+                        hopt_iterations.append(one_search[one_search <= mean_single_search].idxmin())
+            fig.add_trace(go.Box(y=hopt_iterations,name=target_hopt, boxmean=True, boxpoints='all', jitter=0.5, whiskerwidth=0.2, marker_size=3, line_width=1))
+        fig.update_layout(yaxis=go.layout.YAxis(title='Iterations'), showlegend=False)
+        fig.show()
