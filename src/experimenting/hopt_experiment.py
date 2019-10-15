@@ -137,6 +137,7 @@ class HoptExperiment:
         fig.show()
 
     def visualize_walltime_comparison(self, base_search, iterations):
+
         target_hopt_ids = [hopt.identifier for hopt in self._hopts]
         target_hopt_ids.remove(base_search)
         fig = go.Figure()
