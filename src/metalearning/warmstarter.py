@@ -7,11 +7,16 @@ from src.metalearning.metadata import MetaSample
 
 class Warmstarter:
 
-    def __init__(self, metadataset, n_init_configs=1, n_sim_samples=1, n_best_per_sample=1):
+    def __init__(self, metadataset, n_init_configs=1, n_sim_samples=1, n_best_per_sample=False, cold=False):
         self._metadataset = metadataset
         self._n_init_configs = n_init_configs
         self._n_sim_samples = n_sim_samples
+        if n_best_per_sample:
+            self._n_best_per_sample = n_best_per_sample
+        else:
+            self._n_best_per_sample = n_init_configs
         self._n_best_per_sample = n_best_per_sample
+        self._cold = cold
 
     @property
     def metadataset(self):
@@ -31,7 +36,10 @@ class Warmstarter:
         st_metafeature_sample = target_sample.metafeatures / self._metadataset.metafeature_set.max()
 
         # calculate similarities
-        sims = cdist(st_metafeature_set, pd.DataFrame(st_metafeature_sample).T, metric='euclidean')
+        if self._cold:
+            sims = -cdist(st_metafeature_set, pd.DataFrame(st_metafeature_sample).T, metric='euclidean')
+        else:
+            sims = cdist(st_metafeature_set, pd.DataFrame(st_metafeature_sample).T, metric='euclidean')
         sims_df = pd.DataFrame(data=sims, index=self._metadataset.metafeature_set.index)
 
         # remove 100% similar dataset from the samples to choose from
