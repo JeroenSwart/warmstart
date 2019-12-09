@@ -114,7 +114,9 @@ class BayesianHopt:
 
         return results
 
-    def visualize_search_performance(results, xaxis='iterations', all_losses=False, crossvalidation=False):
+    def visualize_search_performance(self, xaxis='iterations', all_losses=False, crossvalidation=False):
+        results = self.results
+
         # create figure
         fig = go.Figure()
 
