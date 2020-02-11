@@ -1,16 +1,14 @@
-from src.utils.metafeature_utils import size, endogenous_mean, maxminvar, adf, cumac
-
 import pandas as pd
 from tqdm import tqdm
 
 
 class MetaSample:
 
-    def __init__(self, identifier, time_series, results=None):
+    def __init__(self, identifier, train_dataset, test_dataset, results=None):
         self._identifier = identifier
-        self._time_series = time_series
+        self._train_dataset = train_dataset
+        self._test_dataset = test_dataset
         self._results = results
-        self._metafeatures = None
 
     @property
     def identifier(self):
@@ -18,21 +16,22 @@ class MetaSample:
 
     @property
     def time_series(self):
-        return self._time_series
+        return self._train_dataset
+
+    @property
+    def test_time_series(self):
+        return self._test_dataset
 
     @property
     def results(self):
         return self._results
 
-    @property
-    def metafeatures(self):
-        if self._metafeatures is None:
-            metafeature_functions = [size, cumac]
-            self._metafeatures = pd.Series(
-                data=[calc(self.time_series) for calc in metafeature_functions],
-                index=[calc.__name__ for calc in metafeature_functions]
-            )
-        return self._metafeatures
+    def metafeatures(self, metafeature_functions):
+        metafeatures = pd.Series(
+            data=[calc(self.time_series) for calc in metafeature_functions],
+            index=[calc.__name__ for calc in metafeature_functions]
+        )
+        return metafeatures
 
     def get_best_hyperparameters(self, nr_best):
         best_configs_df = self.results.sort_values(by=[('diagnostics', 'mae')]).iloc[:nr_best]['hyperparameters']
@@ -46,9 +45,10 @@ class MetaSample:
 
 class MetaDataset:
 
-    def __init__(self, metasamples):
+    def __init__(self, metasamples, metafeature_functions):
         self.metasamples = metasamples
+        self.metafeature_functions = metafeature_functions
         self.metafeature_set = pd.DataFrame(
-            data=[metasample.metafeatures for metasample in tqdm(self.metasamples, desc='Calculate metafeatures of metasamples')],
+            data=[metasample.metafeatures(metafeature_functions) for metasample in tqdm(self.metasamples, desc='Calculate metafeatures of metasamples')],
             index=[metasample.identifier for metasample in self.metasamples]
         )

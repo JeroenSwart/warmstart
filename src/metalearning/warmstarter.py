@@ -29,11 +29,11 @@ class Warmstarter:
     def suggest(self, time_series):
 
         # make a metasample
-        target_sample = MetaSample('target', time_series)
+        target_sample = MetaSample('target', time_series, test_dataset=None)
 
         # standardize metafeatures
         st_metafeature_set = self._metadataset.metafeature_set / self._metadataset.metafeature_set.max()
-        st_metafeature_sample = target_sample.metafeatures / self._metadataset.metafeature_set.max()
+        st_metafeature_sample = target_sample.metafeatures(self._metadataset.metafeature_functions) / self._metadataset.metafeature_set.max()
 
         # calculate similarities
         if self._cold:
