@@ -3,6 +3,7 @@ import pandas as pd
 
 from scipy.spatial.distance import cdist
 from src.metalearning.metadata import MetaSample
+from sklearn.preprocessing import StandardScaler
 
 
 class Warmstarter:
@@ -32,8 +33,10 @@ class Warmstarter:
         target_sample = MetaSample('target', time_series, test_dataset=None)
 
         # standardize metafeatures
-        st_metafeature_set = self._metadataset.metafeature_set / self._metadataset.metafeature_set.max()
-        st_metafeature_sample = target_sample.metafeatures(self._metadataset.metafeature_functions) / self._metadataset.metafeature_set.max()
+        df = self._metadataset.metafeature_set
+        scaler = StandardScaler().fit(df)
+        st_metafeature_set = pd.DataFrame(data=scaler.transform(df), columns=df.columns, index=df.index)
+        st_metafeature_sample = (target_sample.metafeatures(self._metadataset.metafeature_functions) - scaler.mean_)/scaler.scale_
 
         # calculate similarities
         if self._cold:
