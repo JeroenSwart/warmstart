@@ -155,3 +155,25 @@ class HoptExperiment:
             fig.add_trace(go.Box(y=hopt_iterations,name=target_hopt, boxmean=True, boxpoints='all', jitter=0.5, whiskerwidth=0.2, marker_size=3, line_width=1))
         fig.update_layout(yaxis=go.layout.YAxis(title='Iterations'), showlegend=False)
         fig.show()
+
+    def visualize_avg_performance_single_datasets(self, sample_ids):
+
+        fig = make_subplots(rows=1, cols=len(sample_ids))
+
+        for sample_id, i in enumerate(sample_ids):
+
+            # transform to best so far dataframe
+            data = self.best_so_far[sample_id].mean(level='iterations')
+
+            for identifier in [hopt.identifier for hopt in self._hopts]:
+                fig.add_trace(go.Scatter(y=data[identifier], name=identifier), row=1, col=i)
+
+            fig.update_layout(
+                title=sample_id,
+                xaxis=go.layout.XAxis(title='Iterations'),
+                yaxis=go.layout.YAxis(title='MAE')
+            )
+
+        fig.update_layout(height=600, width=800, title_text="Subplots")
+
+        fig.show()

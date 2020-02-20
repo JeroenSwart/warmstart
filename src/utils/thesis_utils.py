@@ -49,6 +49,5 @@ def get_standard_dataset(dataset_name):
     data = df[[end_name, ex_name] + time_based_features].rename(columns={end_name: 'endogenous', ex_name: 'exogenous'})
     dataset = data.dropna(subset=['endogenous'])[:int(split_name[2])]
     test_data = data.dropna(subset=['endogenous'])[int(split_name[2]):int(split_name[2])+365*24]
-    print(len(test_data))
 
     return dataset, test_data
