@@ -64,6 +64,7 @@ export VENV_PATH="../autoxgb_venv"
 virtualenv -p python3 $VENV_PATH
 source ../autoxgb_venv/bin/activate
 pip3 install -r requirements.txt
+pre-commit install
 export KERNEL_NAME="autoxgb_kernel"
 export DISPLAY_NAME="AutoXGB Notebook"
 pip3 install ipykernel
@@ -87,6 +88,7 @@ source ../autoxgb_venv/bin/activate
 pip3 install -r requirements.txt
 <INSTALL COMMAND>
 pip install -e .
+pre-commit install
 pip freeze > requirements.txt
 export KERNEL_NAME="autoxgb_kernel"
 export DISPLAY_NAME="AutoXGB Notebook"

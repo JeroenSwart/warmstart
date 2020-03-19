@@ -7,8 +7,14 @@ from sklearn.preprocessing import StandardScaler
 
 
 class Warmstarter:
-
-    def __init__(self, metadataset, n_init_configs=1, n_sim_samples=1, n_best_per_sample=False, cold=False):
+    def __init__(
+        self,
+        metadataset,
+        n_init_configs=1,
+        n_sim_samples=1,
+        n_best_per_sample=False,
+        cold=False,
+    ):
         self._metadataset = metadataset
         self._n_init_configs = n_init_configs
         self._n_sim_samples = n_sim_samples
@@ -30,19 +36,32 @@ class Warmstarter:
     def suggest(self, time_series):
 
         # make a metasample
-        target_sample = MetaSample('target', time_series, test_dataset=None)
+        target_sample = MetaSample("target", time_series, test_dataset=None)
 
         # standardize metafeatures
         df = self._metadataset.metafeature_set
         scaler = StandardScaler().fit(df)
-        st_metafeature_set = pd.DataFrame(data=scaler.transform(df), columns=df.columns, index=df.index)
-        st_metafeature_sample = (target_sample.metafeatures(self._metadataset.metafeature_functions) - scaler.mean_)/scaler.scale_
+        st_metafeature_set = pd.DataFrame(
+            data=scaler.transform(df), columns=df.columns, index=df.index
+        )
+        st_metafeature_sample = (
+            target_sample.metafeatures(self._metadataset.metafeature_functions)
+            - scaler.mean_
+        ) / scaler.scale_
 
         # calculate similarities
         if self._cold:
-            sims = -cdist(st_metafeature_set, pd.DataFrame(st_metafeature_sample).T, metric='euclidean')
+            sims = -cdist(
+                st_metafeature_set,
+                pd.DataFrame(st_metafeature_sample).T,
+                metric="euclidean",
+            )
         else:
-            sims = cdist(st_metafeature_set, pd.DataFrame(st_metafeature_sample).T, metric='euclidean')
+            sims = cdist(
+                st_metafeature_set,
+                pd.DataFrame(st_metafeature_sample).T,
+                metric="euclidean",
+            )
         sims_df = pd.DataFrame(data=sims, index=self._metadataset.metafeature_set.index)
 
         # remove 100% similar dataset from the samples to choose from
@@ -53,12 +72,15 @@ class Warmstarter:
         suggestions = []
         sim_ids = sims_diff.nsmallest(self._n_sim_samples, sims_diff.columns).index
         for sim_id in sim_ids:
-            configs = [pd.DataFrame(sample.get_best_hyperparameters(self._n_best_per_sample)) for sample in
-                       self._metadataset.metasamples if sample.identifier == sim_id]
+            configs = [
+                pd.DataFrame(sample.get_best_hyperparameters(self._n_best_per_sample))
+                for sample in self._metadataset.metasamples
+                if sample.identifier == sim_id
+            ]
             suggestions.extend(configs)
         interim = pd.concat(suggestions)
         count = interim.groupby(interim.columns.tolist(), as_index=False).size()
-        best = count.sort_values(ascending=False)[:self._n_init_configs]
+        best = count.sort_values(ascending=False)[: self._n_init_configs]
         suggestions = [dict(zip(best.index.names, values)) for values in best.index]
 
         return suggestions
