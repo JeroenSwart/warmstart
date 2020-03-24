@@ -11,6 +11,8 @@ class HoptExperiment:
     previous tasks. The results are stored in an attribute, which can be visualized by hyperoptimization experiment
     visualizers.
 
+    todo: attribute result
+
     """
 
     def __init__(self, hopts, objective, metadataset, duplicates=1):
