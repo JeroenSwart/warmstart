@@ -94,30 +94,6 @@ def model_and_feature_interactions1(time_series):
     return ratio
 
 
-# def model_and_feature_interactions2(time_series):
-#
-#     # split time_series in train and test
-#     size = len(time_series)
-#     ex_train = time_series.drop(columns=['endogenous'])[:size*2/3]
-#     ex_test = time_series.drop(columns=['endogenous'])[size*2/3:]
-#     end_train = pd.DataFrame(data=time_series['endogenous'])[:size*2/3]
-#     end_test = pd.DataFrame(data=time_series['endogenous'])[size*2/3:]
-#
-#     # XGBoost regression, train and predict
-#     xg_reg = xgb.XGBRegressor(objective='reg:squarederror', n_trees=1000, max_depth=1000)
-#     xg_reg.fit(ex_train, ex_train)
-#     xgb_preds = pd.Series(data=xg_reg.predict(ex_test), index=end_test.index)
-#
-#     # Linear regression, train and predict
-#     lreg = LinearRegression().fit(ex_train, end_train)
-#     lreg_preds = pd.Series(data=lreg.predict(ex_test), index=end_test.index)
-#
-#     # calculate mape ratio of xgb and linear regression
-#     ratio = mean_absolute_error(xgb_preds, end_test) / mean_absolute_error(lreg_preds, end_test)
-#
-#     return ratio
-
-
 def pca_rank_cor(time_series):
 
     # take exogenous frame
