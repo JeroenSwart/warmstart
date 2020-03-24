@@ -1,5 +1,7 @@
 import pandas as pd
 from src.pipeline_optimization.bayesian_hopt import Config
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 
 def thesis_lookup_objective(name):
@@ -66,3 +68,27 @@ def get_standard_dataset(dataset_name):
     ]
 
     return dataset, test_data
+
+
+def visualize_avg_performance_single_datasets(hopt_exp, sample_ids):
+
+    fig = make_subplots(rows=1, cols=len(sample_ids))
+
+    for i, sample_id in enumerate(sample_ids):
+        # transform to best so far dataframe
+        data = hopt_exp.best_so_far[sample_id].mean(level="iterations")
+
+        for identifier in [hopt.identifier for hopt in hopt_exp._hopts]:
+            fig.add_trace(
+                go.Scatter(y=data[identifier], name=identifier), row=1, col=i + 1
+            )
+
+        fig.update_layout(
+            title=sample_id,
+            xaxis=go.layout.XAxis(title="Iterations"),
+            yaxis=go.layout.YAxis(title="MAE"),
+        )
+
+    fig.update_layout(height=600, width=1500, title_text="Subplots")
+
+    fig.show()
