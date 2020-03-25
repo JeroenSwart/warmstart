@@ -50,6 +50,9 @@ class BayesianHopt:
         self._warmstarter = warmstarter
         self.results = None
 
+    # todo: introduce possibility to not input an objective during initialization, but check for an objective when the
+    #   bayesian hyperparameter optimization is run
+
     @property
     def identifier(self):
         return self._identifier

@@ -34,6 +34,7 @@ def visualize_avg_performance(hopt_exp, sample_id):
 
 
 def visualize_performance_heatmap(hopt_exp, sample_id):
+    # todo: check for duplicates > 1
     hopt_ids = [hopt.identifier for hopt in hopt_exp._hopts]
     result = hopt_exp.results[sample_id]
 
@@ -56,6 +57,7 @@ def visualize_performance_heatmap(hopt_exp, sample_id):
 
 
 def visualize_perf_distribution(hopt_exp, sample_id, iterations):
+    # todo: check for duplicates > 1
     fig = go.Figure()
 
     data = hopt_exp.results[sample_id].unstack(0).iloc[iterations].stack(1)

@@ -40,7 +40,7 @@ class HoptExperiment:
 
     @property
     def best_so_far(self):
-        """Transformation of results to the best so far performance for every search run"""
+        """Transformation of results to the best so far performance for every search run."""
         if self._best_so_far.empty:
             best_so_far = []
             target_ids = self.results.columns.levels[0].values
