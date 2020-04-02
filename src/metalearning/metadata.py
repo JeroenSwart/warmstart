@@ -3,39 +3,21 @@ from tqdm import tqdm
 
 
 class MetaSample:
-    """The summary line for a class docstring should fit on one line.
+    """A MetaSample is a previous task, stored as a dataset and the results of its pipeline optimization.
 
-    If the class has public attributes, they may be documented here
-    in an ``Attributes`` section and follow the same formatting as a
-    function's ``Args`` section. Alternatively, attributes may be documented
-    inline with the attribute's declaration (see __init__ method below).
-
-    Properties created with the ``@property`` decorator should be documented
-    in the property's getter method.
-
-    Attributes:
-        attr1 (str): Description of `attr1`.
-        attr2 (:obj:`int`, optional): Description of `attr2`.
+    MetaSamples are bundled in a MetaDataset to infer a warmstart from.
 
     """
 
     def __init__(self, identifier, train_dataset, test_dataset, results=None):
-        """Example of docstring on the __init__ method.
-
-        The __init__ method may be documented in either the class level
-        docstring, or as a docstring on the __init__ method itself.
-
-        Either form is acceptable, but the two should not be mixed. Choose one
-        convention to document the __init__ method and be consistent with it.
-
-        Note:
-            Do not include the `self` parameter in the ``Args`` section.
+        """A MetaSample is instantiated with a unique identifier, a training dataset, a testing dataset, and the results
+        of a pipeline optimization.
 
         Args:
-            param1 (str): Description of `param1`.
-            param2 (:obj:`int`, optional): Description of `param2`. Multiple
-                lines are supported.
-            param3 (:obj:`list` of :obj:`str`): Description of `param3`.
+            identifier (str): a unique identifier for this MetaSample.
+            train_dataset (pd.DataFrame): training dataset.
+            test_dataset (pd.DataFrame): test dataset.
+            results (BayesianHopt): results of a Bayesian optimization run.
 
         """
         self._identifier = identifier
@@ -47,6 +29,7 @@ class MetaSample:
     def identifier(self):
         return self._identifier
 
+    # todo: fix inconsistent naming
     @property
     def time_series(self):
         return self._train_dataset
@@ -59,104 +42,49 @@ class MetaSample:
     def results(self):
         return self._results
 
+    # todo: move this functionality to MetaDataset class? Since only MetaDataset actually stores metafeatures...
     def metafeatures(self, metafeature_functions):
-        """Class methods are similar to regular functions.
-
-        Note:
-            Do not include the `self` parameter in the ``Args`` section.
-
-        Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
-        Returns:
-            True if successful, False otherwise.
-
-        """
+        """Returns a vector of metafeatures of this MetaSample, using a list of metafeature functions."""
         metafeatures = pd.Series(
             data=[calc(self.time_series) for calc in metafeature_functions],
             index=[calc.__name__ for calc in metafeature_functions],
         )
         return metafeatures
 
-    def get_best_hyperparameters(self, nr_best):
-        """Class methods are similar to regular functions.
-
-        Note:
-            Do not include the `self` parameter in the ``Args`` section.
-
-        Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
-        Returns:
-            True if successful, False otherwise.
-
-        """
+    def get_best_hyperparameters(self, n):
+        """Returns the best n pipeline configurations, found by a Bayesian optimization."""
         best_configs_df = self.results.sort_values(by=[("diagnostics", "mae")]).iloc[
-            :nr_best
+            :n
         ]["hyperparameters"]
-        best_configs = [best_configs_df.iloc[i].to_dict() for i in range(nr_best)]
+        best_configs = [best_configs_df.iloc[i].to_dict() for i in range(n)]
         return best_configs
 
-    def get_best_performance(self):
-        """Class methods are similar to regular functions.
-
-        Note:
-            Do not include the `self` parameter in the ``Args`` section.
-
-        Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
-        Returns:
-            True if successful, False otherwise.
-
-        """
-        best_perf = self.results.sort_values(by=[("diagnostics", "mae")]).iloc[0][
+    def get_best_performance(self, metric):
+        """Returns the best achieved model performance according to a metric, found by a Bayesian optimization."""
+        assert (
+            metric in self.results["diagnostics"].columns.values
+        ), "metric is not in diagnostic results"
+        best_perf = self.results.sort_values(by=[("diagnostics", metric)]).iloc[0][
             ("diagnostics", "mae")
         ]
         return best_perf
 
 
 class MetaDataset:
-    """The summary line for a class docstring should fit on one line.
-
-    If the class has public attributes, they may be documented here
-    in an ``Attributes`` section and follow the same formatting as a
-    function's ``Args`` section. Alternatively, attributes may be documented
-    inline with the attribute's declaration (see __init__ method below).
-
-    Properties created with the ``@property`` decorator should be documented
-    in the property's getter method.
-
-    Attributes:
-        attr1 (str): Description of `attr1`.
-        attr2 (:obj:`int`, optional): Description of `attr2`.
-
-    """
+    """A MetaDataset is a collection of MetaSamples, used for warmstarting pipeline optimizations by metalearning."""
 
     def __init__(self, metasamples, metafeature_functions):
-        """Example of docstring on the __init__ method.
-
-        The __init__ method may be documented in either the class level
-        docstring, or as a docstring on the __init__ method itself.
-
-        Either form is acceptable, but the two should not be mixed. Choose one
-        convention to document the __init__ method and be consistent with it.
-
-        Note:
-            Do not include the `self` parameter in the ``Args`` section.
+        """A MetaDataset is instantiated with metasamples and metafeature functions.
 
         Args:
-            param1 (str): Description of `param1`.
-            param2 (:obj:`int`, optional): Description of `param2`. Multiple
-                lines are supported.
-            param3 (:obj:`list` of :obj:`str`): Description of `param3`.
+            metasamples (list of MetaSample): the metasamples.
+            # todo: what is documentation format for giving inputs and outputs of functions within a list?
+            metafeature_functions (list of function): metafeature functions that map datasets to scalars
 
         """
         self.metasamples = metasamples
         self.metafeature_functions = metafeature_functions
+        # todo: think about moving the metafeature calculation to the Warmstarter.
         self.metafeature_set = pd.DataFrame(
             data=[
                 metasample.metafeatures(metafeature_functions)

@@ -67,7 +67,7 @@ class HoptExperiment:
             target_ids (list of str): names of datasets to perform the pipeline optimizations on.
 
         """
-        # todo: check whether target_ids are in metadataset
+        # todo: assert target_ids are in metadataset
 
         results = []
         samples = [
