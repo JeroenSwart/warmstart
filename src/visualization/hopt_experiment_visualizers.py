@@ -7,7 +7,7 @@ def visualize_avg_ranks(hopt_exp):
     search strategy. The visualizer averages the results over leave-one-out folds and duplicates of the experiment.
 
     Args:
-        hopt_exp (experimenting.HoptExperiment): hyperoptimization experiment.
+        hopt_exp (HoptExperiment): hyperoptimization experiment.
 
     """
     fig = go.Figure()
@@ -29,8 +29,9 @@ def visualize_avg_performance(hopt_exp, sample_id):
     averaged over the duplicates of the experiment.
 
     Args:
-        hopt_exp (experimenting.HoptExperiment): hyperoptimization experiment.
-        sample_id (BayesianHopt.identifier): name of the dataset, also the identifier of the Bayesian hyperoptimization.
+        hopt_exp (HoptExperiment): hyperoptimization experiment.
+        sample_id (BayesianHopt.identifier): name of the dataset, also the identifier of the
+            Bayesian hyperoptimization.
 
     """
     fig = go.Figure()
@@ -53,8 +54,9 @@ def visualize_performance_heatmap(hopt_exp, sample_id):
     search strategy in the hyperoptimization experiment.
 
     Args:
-        hopt_exp (experimenting.HoptExperiment): hyperoptimization experiment.
-        sample_id (BayesianHopt.identifier): name of the dataset, also the identifier of the Bayesian hyperoptimization.
+        hopt_exp (HoptExperiment): hyperoptimization experiment.
+        sample_id (BayesianHopt.identifier): name of the dataset, also the identifier of the
+            Bayesian hyperoptimization.
 
     """
     # todo: check for duplicates > 1
@@ -84,8 +86,9 @@ def visualize_perf_distribution(hopt_exp, sample_id, iteration):
     hyperoptimization experiment.
 
     Args:
-        hopt_exp (experimenting.HoptExperiment): hyperoptimization experiment.
-        sample_id (BayesianHopt.identifier): name of the dataset, also the identifier of the Bayesian hyperoptimization.
+        hopt_exp (HoptExperiment): hyperoptimization experiment.
+        sample_id (BayesianHopt.identifier): name of the dataset, also the identifier of the
+            Bayesian hyperoptimization.
         iteration (int): the iteration to visualize.
 
     """
