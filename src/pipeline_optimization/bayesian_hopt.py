@@ -7,69 +7,71 @@ from hyperopt.fmin import generate_trials_to_calculate
 
 
 class Config:
-    """The summary line for a class docstring should fit on one line.
+    # todo: is configuration the right naming? I mean it as 'one of the set of configurations'. Maybe back to hyperparameters?
+    # todo: change config to superpameter after feedback Peyman.
+    """A Config is the definition of the search space in one dimension.
 
-    If the class has public attributes, they may be documented here
-    in an ``Attributes`` section and follow the same formatting as a
-    function's ``Args`` section. Alternatively, attributes may be documented
-    inline with the attribute's declaration (see __init__ method below).
-
-    Properties created with the ``@property`` decorator should be documented
-    in the property's getter method.
-
-    Attributes:
-        attr1 (str): Description of `attr1`.
-        attr2 (:obj:`int`, optional): Description of `attr2`.
-
+    This base abstraction is used for compatibility with the variable definitions of search spaces in external packages
+    for pipeline optimization.
     """
 
-    def __init__(self, scope, scale="linear", granularity=None, rounding=None):
-        """Example of docstring on the __init__ method.
-
-        The __init__ method may be documented in either the class level
-        docstring, or as a docstring on the __init__ method itself.
-
-        Either form is acceptable, but the two should not be mixed. Choose one
-        convention to document the __init__ method and be consistent with it.
-
-        Note:
-            Do not include the `self` parameter in the ``Args`` section.
+    def __init__(self, start, stop, scale="lin", granularity=None, rounding=None):
+        """A Config is instantiated with a starting value, stopping value and a scale of the space. The granularity and
+        a rounding function are optional arguments.
 
         Args:
-            param1 (str): Description of `param1`.
-            param2 (:obj:`int`, optional): Description of `param2`. Multiple
-                lines are supported.
-            param3 (:obj:`list` of :obj:`str`): Description of `param3`.
+            start (float): the starting value of the sequence.
+            stop (float): the end value of the sequence.
+            scale ('lin' or 'log', optional): the prior on this dimension.
+            granularity (int, optional): the number of evenly spaced samples over the interval [`start`, `stop`].
+            rounding (int, optional): the given number of decimals to round the array to.
 
         """
-        self._scope = scope
+        self._start = start
+        self._stop = stop
         self._scale = scale
         self._granularity = granularity
         self._rounding = rounding
 
     @property
-    def scope(self):
-        return self._scope
+    def start(self):
+        return self._start
+
+    @property
+    def stop(self):
+        return self._stop
+
+    @property
+    def scale(self):
+        return self._scale
 
     @property
     def granularity(self):
         return self._granularity
 
+    @property
+    def rounding(self):
+        return self._rounding
+
 
 class BayesianHopt:
-    """The summary line for a class docstring should fit on one line.
+    # todo: change name because we do pipeline optimizations in stead of hyperparameter optimizations
+    """A BayesianHopt (Bayesian hyperparameter optimization) is an optimization algorithm for pipeline configurations.
 
-    If the class has public attributes, they may be documented here
-    in an ``Attributes`` section and follow the same formatting as a
-    function's ``Args`` section. Alternatively, attributes may be documented
-    inline with the attribute's declaration (see __init__ method below).
+    Bayesian optimization is widely used for optimizing computationally expensive black box functions. It attempts to
+    reduce the number of expensive evaluations, by making intelligent suggestions in the search space. The algorithm
+    has an urge to exploit regions with the best evaluations scores, and to explore the regions where few evaluations
+    have been performed.
 
-    Properties created with the ``@property`` decorator should be documented
-    in the property's getter method.
+    The intelligent suggestions come from a model trained on the historical evaluations of the objective function. The
+    proposed suggestions from the model are evaluated by an acquisition function, to choose the most promising
+    suggestion.
 
-    Attributes:
-        attr1 (str): Description of `attr1`.
-        attr2 (:obj:`int`, optional): Description of `attr2`.
+    This implementation supports the hyperopt package, which uses the Tree Parzen Estimators as model with the
+    expected improvement as acquisition function.
+
+    Attribute:
+        results(pd.DataFrame): pipeline configuration and evaluation info from search iterations.
 
     """
 
@@ -83,22 +85,30 @@ class BayesianHopt:
         nr_random_starts=20,
         warmstarter=None,
     ):
-        """Initializes Bayesian hyperparameter optimization instance.
-
-        The __init__ method may be documented in either the class level
-        docstring, or as a docstring on the __init__ method itself.
-
-        Either form is acceptable, but the two should not be mixed. Choose one
-        convention to document the __init__ method and be consistent with it.
-
-        Note:
-            Do not include the `self` parameter in the ``Args`` section.
+        """A BayesianHopt is instantiated with a unique identifier, a search space, an objective function and a maximum
+        number of search iterations. Optionally, the search strategy can be switched to random search, the number of
+        initial random starts can be specified and the search strategy can be boosted with a warmstarter.
 
         Args:
-            param1 (str): Description of `param1`.
-            param2 (:obj:`int`, optional): Description of `param2`. Multiple
-                lines are supported.
-            param3 (:obj:`list` of :obj:`str`): Description of `param3`.
+            identifier (str): a unique identifier for this BayesianHopt instance.
+            search_space (dict): the space of pipeline configurations to search.
+            objective (function): the mapping from a pipeline configuration to performance index.
+            max_evals (int): the number of search iterations after which to stop.
+            algo ('tpe' or 'random'): choice between Tree Parzen Estimator or random search.
+            nr_random_starts (int): the number of random starts to begin with.
+            # todo: what are the docstring rules for referring to another object, s.t. an 'unexpected type' warning
+                pops up when the input type is wrong?
+            warmstarter (Warmstarter): the metalearning model that suggests initial pipeline configurations.
+
+        Search_space example:
+
+            search_space = {
+                "num_trees": Config(100, 800, granularity=6, rounding=1),
+                "learning_rate": Config(-2.5, -0.5, granularity=10, scale="log", rounding=13),
+                "max_depth": Config(5, 20, granularity=8, rounding=0),
+                "min_child_weight": Config(5, 40, granularity=3, rounding=1),
+                "subsample": Config(0.5, 1.0, granularity=3, rounding=2),
+            }
 
         """
         self._identifier = identifier
@@ -119,50 +129,37 @@ class BayesianHopt:
     def identifier(self):
         return self._identifier
 
+    # todo: seems like this little guy should be in a search space class, which does not yet exist..?
     def get_numpy_space(self):
-        """Class methods are similar to regular functions.
+        """Returns the search space in the following format:
 
-        Note:
-            Do not include the `self` parameter in the ``Args`` section.
-
-        Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
-        Returns:
-            True if successful, False otherwise.
+        search_space = {
+            'num_trees': array([100., 240., 380., 520., 660., 800.]),
+            'learning_rate': array([0.00316228, 0.005275  , 0.00879923, 0.01467799, 0.02448437,0.04084239, 0.06812921]),
+            'max_depth': array([ 5.,  7.,  9., 11., 14., 16., 18., 20.]),
+            'min_child_weight': array([ 5. , 22.5, 40. ]),
+            'subsample': array([0.5 , 0.75, 1.  ])
+        }
 
         """
-        space = self._search_space
         real_space = {}
-        for param in space.keys():
-            if space[param]._scale == "linear":
+        for param in self._search_space.keys():
+            config = self._search_space[param]
+            if config.scale == "lin":
                 real_space[param] = np.linspace(
-                    space[param].scope[0],
-                    space[param].scope[1],
-                    space[param].granularity,
+                    config.start, config.stop, config.granularity
                 )
-            if space[param]._scale == "log":
+            if config.scale == "log":
                 real_space[param] = np.logspace(
-                    space[param].scope[0],
-                    space[param].scope[1],
-                    space[param].granularity,
+                    config.start, config.stop, config.granularity
                 )
-            real_space[param] = np.round(real_space[param], space[param]._rounding)
+            real_space[param] = np.round(real_space[param], config.rounding)
         return real_space
 
-    def hyperopt_objective(self, unit_params):
-        """Class methods are similar to regular functions.
-
-        Note:
-            Do not include the `self` parameter in the ``Args`` section.
-
-        Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
-        Returns:
-            True if successful, False otherwise.
+    def _hyperopt_objective(self, unit_params):
+        """This method overcomes search space compatibility issues of the hyperopt package, which is not able to
+        discretize a search space to non-integer values. Hyperopt is given an integer search space, and this search
+        space is transformed back into the real (non-integer) search space format in this objective function.
 
         """
         # get real space
@@ -183,18 +180,12 @@ class BayesianHopt:
             "params": real_params,
         }
 
-    def run_bayesian_hopt(self, time_series=None, show_progressbar=True):
-        """Runs the Bayesian hyperparameter optimization.
-
-        Note:
-            Do not include the `self` parameter in the ``Args`` section.
+    def run_bayesian_hopt(self, time_series, show_progressbar=True):
+        """Runs the Bayesian hyperparameter optimization. The results are stored as an attribute.
 
         Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
-        Returns:
-            True if successful, False otherwise.
+            time_series (pd.DataFrame): the dataset for which to optimize the superparameters
+            show_progressbar (boolean, optional): show bar for the progress of the superoptimization
 
         """
         time_series = pd.DataFrame(time_series)
@@ -203,6 +194,8 @@ class BayesianHopt:
             raise ValueError(
                 "A warmstart requires an input time series to derive a suggestion from."
             )
+
+        # todo: assert that time_series has the right format for the objective function.
 
         # Create trials object to store information on optimization process
         if self._warmstarter:
@@ -228,9 +221,10 @@ class BayesianHopt:
             for key in list(space.keys())
         }
 
-        # Run the hyperopt optimization
+        # Run the hyperopt optimization, note that is in unit format, due to limitations of search spaces in hyperopt.
+        # The search space is transformed back in _hyperopt_objective.
         fmin(
-            fn=self.hyperopt_objective,
+            fn=self._hyperopt_objective,
             space=hyperopt_space,
             algo=self._algo,
             max_evals=hyperopt_evals,

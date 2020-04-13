@@ -14,13 +14,14 @@ class MetaSample:
         of a pipeline optimization.
 
         Args:
-            identifier (str): a unique identifier for this MetaSample.
+            identifier (str): a unique identifier for this MetaSample instance.
             train_dataset (pd.DataFrame): training dataset.
             test_dataset (pd.DataFrame): test dataset.
             results (BayesianHopt): results of a Bayesian optimization run.
 
         """
         self._identifier = identifier
+        # todo: input should be dataset. A split method should be defined, I don't know where yet.
         self._train_dataset = train_dataset
         self._test_dataset = test_dataset
         self._results = results

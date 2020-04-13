@@ -64,6 +64,7 @@ class Warmstarter:
 
         """
         # make a metasample
+        # todo: why is there no test dataset needed? Metafeatures should be calculated from both train and test set.
         target_sample = MetaSample("target", time_series, test_dataset=None)
 
         # standardize metafeatures
@@ -79,6 +80,7 @@ class Warmstarter:
 
         # calculate similarities
         if self._cold:
+            # todo: fix warning, ndarray is expected instead of DataFrame
             sims = -cdist(
                 st_metafeature_set,
                 pd.DataFrame(st_metafeature_sample).T,

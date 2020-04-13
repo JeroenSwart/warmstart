@@ -2,6 +2,7 @@
   <dictionary name="Jeroen">
     <words>
       <w>crossvalidation</w>
+      <w>discretize</w>
       <w>heatmap</w>
       <w>hopt</w>
       <w>hopts</w>
@@ -13,8 +14,11 @@
       <w>metafeature</w>
       <w>metafeatures</w>
       <w>metalearner</w>
+      <w>metalearning</w>
       <w>metasample</w>
       <w>metasamples</w>
+      <w>superoptimization</w>
+      <w>superparameters</w>
       <w>walltime</w>
       <w>warmstart</w>
       <w>warmstarter</w>

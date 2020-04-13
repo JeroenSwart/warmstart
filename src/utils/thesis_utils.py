@@ -38,13 +38,11 @@ def thesis_lookup_objective(name):
 
 def thesis_search_space():
     search_space = {
-        "num_trees": Config(scope=[100, 800], granularity=6, rounding=1),
-        "learning_rate": Config(
-            scope=[-2.5, -0.5], granularity=10, scale="log", rounding=13
-        ),
-        "max_depth": Config(scope=[5, 20], granularity=8, rounding=0),
-        "min_child_weight": Config(scope=[5, 40], granularity=3, rounding=1),
-        "subsample": Config(scope=[0.5, 1.0], granularity=3, rounding=2),
+        "num_trees": Config(100, 800, granularity=6, rounding=1),
+        "learning_rate": Config(-2.5, -0.5, granularity=10, scale="log", rounding=13),
+        "max_depth": Config(5, 20, granularity=8, rounding=0),
+        "min_child_weight": Config(5, 40, granularity=3, rounding=1),
+        "subsample": Config(0.5, 1.0, granularity=3, rounding=2),
     }
     return search_space
 
