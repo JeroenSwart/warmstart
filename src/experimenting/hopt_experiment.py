@@ -3,7 +3,34 @@ from tqdm import tqdm
 
 
 class HoptExperiment:
-    def __init__(self, hopts, objective=None, metadataset=None, duplicates=1):
+    """A hyperoptimization experiment (HoptExperiment) compares pipeline optimization strategies.
+
+    In a HoptExperiment, pipeline optimization strategies are compared by running them on multiple datasets (the
+    metadataset). For the often stochastic nature of these strategies, duplicate experiments can be run to average over.
+    For strategies involving a warmstart, only the dataset at hand is excluded from the metadataset to form the set of
+    previous tasks. The results are stored in an attribute, which can be visualized by hyperoptimization experiment
+    visualizers.
+
+    todo: attribute result
+
+    """
+
+    def __init__(self, hopts, objective, metadataset, duplicates=1):
+        """A HoptExperiment is instantiated with the to be compared search strategies, the common objective function for
+        training and testing a machine learning model, a metadataset and optionally the number of desired experiment
+        duplicates.
+
+        Note:
+            In this release the pipeline optimization strategies are limited to permutations of the BayesianHopt class.
+
+        Args:
+            hopts (list of BayesianHopt objects): the to be compared search strategies.
+            objective (function, optional): pipeline optimization objective function, a mapping of pipeline
+                configurations to a result, walltime and crossvalidation result.
+            metadataset (MetaDataset object, optional): the set of previous datasets and metafeature information.
+            duplicates: the number of duplicates to average the experiment over.
+
+        """
         self._hopts = hopts
         self._duplicates = duplicates
         self._metadataset = metadataset
@@ -13,6 +40,7 @@ class HoptExperiment:
 
     @property
     def best_so_far(self):
+        """Transformation of results to the best so far performance for every search run."""
         if self._best_so_far.empty:
             best_so_far = []
             target_ids = self.results.columns.levels[0].values
@@ -33,6 +61,13 @@ class HoptExperiment:
         return self._best_so_far
 
     def run_hopt_experiment(self, target_ids):
+        """Running the pipeline optimizations and stores them in the results attribute.
+
+        Arg:
+            target_ids (list of str): names of datasets to perform the pipeline optimizations on.
+
+        """
+        # todo: assert target_ids are in metadataset
 
         results = []
         samples = [
@@ -93,5 +128,3 @@ class HoptExperiment:
             results.append(sample_results)
 
         self.results = pd.concat(results, keys=target_ids, axis=1).stack(2)
-
-        # todo: now we have to make sure that a mean is taken, s.t. all the visualizers work again

@@ -3,6 +3,13 @@ from plotly.subplots import make_subplots
 
 
 def visualize_avg_ranks(hopt_exp):
+    """Visualizes the ranks of the best-so-far test loss of search strategies in a HoptExperiment, per iteration of the
+    search strategy. The visualizer averages the results over leave-one-out folds and duplicates of the experiment.
+
+    Args:
+        hopt_exp (HoptExperiment): hyperoptimization experiment.
+
+    """
     fig = go.Figure()
 
     data = hopt_exp.best_so_far.stack(0).rank(axis=1).mean(level="iterations")
@@ -18,6 +25,15 @@ def visualize_avg_ranks(hopt_exp):
 
 
 def visualize_avg_performance(hopt_exp, sample_id):
+    """Visualizes the best-so-far test loss of the search strategies in a HoptExperiment for one specific dataset,
+    averaged over the duplicates of the experiment.
+
+    Args:
+        hopt_exp (HoptExperiment): hyperoptimization experiment.
+        sample_id (BayesianHopt.identifier): name of the dataset, also the identifier of the
+            Bayesian hyperoptimization.
+
+    """
     fig = go.Figure()
 
     # transform to best so far dataframe
@@ -34,6 +50,16 @@ def visualize_avg_performance(hopt_exp, sample_id):
 
 
 def visualize_performance_heatmap(hopt_exp, sample_id):
+    """Visualizes heatmaps of the test loss with respect to the iteration number of one specific dataset, for every
+    search strategy in the hyperoptimization experiment.
+
+    Args:
+        hopt_exp (HoptExperiment): hyperoptimization experiment.
+        sample_id (BayesianHopt.identifier): name of the dataset, also the identifier of the
+            Bayesian hyperoptimization.
+
+    """
+    # todo: check for duplicates > 1
     hopt_ids = [hopt.identifier for hopt in hopt_exp._hopts]
     result = hopt_exp.results[sample_id]
 
@@ -55,10 +81,21 @@ def visualize_performance_heatmap(hopt_exp, sample_id):
     fig.show()
 
 
-def visualize_perf_distribution(hopt_exp, sample_id, iterations):
+def visualize_perf_distribution(hopt_exp, sample_id, iteration):
+    """Visualizes a boxplot of the test loss for a specific iteration of one dataset, for every search strategy in the
+    hyperoptimization experiment.
+
+    Args:
+        hopt_exp (HoptExperiment): hyperoptimization experiment.
+        sample_id (BayesianHopt.identifier): name of the dataset, also the identifier of the
+            Bayesian hyperoptimization.
+        iteration (int): the iteration to visualize.
+
+    """
+    # todo: check for duplicates > 1
     fig = go.Figure()
 
-    data = hopt_exp.results[sample_id].unstack(0).iloc[iterations].stack(1)
+    data = hopt_exp.results[sample_id].unstack(0).iloc[iteration].stack(1)
 
     for identifier in data.columns:
         fig.add_trace(
@@ -79,6 +116,15 @@ def visualize_perf_distribution(hopt_exp, sample_id, iterations):
 
 
 def visualize_walltime_comparison(hopt_exp, base_search, iterations):
+    """Visualizes boxplots of number iterations needed, before reaching the test loss of a base search strategy at a
+    certain iteration.
+
+    Args:
+        hopt_exp (experimenting.HoptExperiment): hyperoptimization experiment.
+        base_search (BayesianHopt.identifier): the identifier of the compared search strategy
+        iterations (int): the compared iteration
+
+    """
     target_hopt_ids = [hopt.identifier for hopt in hopt_exp._hopts]
     target_hopt_ids.remove(base_search)
     fig = go.Figure()

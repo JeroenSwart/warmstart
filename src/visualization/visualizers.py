@@ -5,6 +5,18 @@ import plotly.graph_objects as go
 def visualize_search_performance(
     bayesian_hopt, xaxis="iterations", all_losses=False, crossvalidation=False
 ):
+    """Visualizes the best-so-far test loss of a search strategy.
+
+    The x-axis can be either set to the number of iterations of the walltime. It is possible to also include the actual
+    test losses and crossvalidation losses.
+
+    Args:
+        bayesian_hopt (BayesianHopt): the Bayesian Hyperoptimization to visualize.
+        xaxis ('iterations' or 'walltime', optional): the variable on the x-axis.
+        all_losses (bool, optional): visualize all test losses
+        crossvalidation (bool, optional): visualize the crossvalidation losses
+
+    """
     results = bayesian_hopt.results
 
     # create figure
