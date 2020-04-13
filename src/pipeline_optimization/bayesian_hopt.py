@@ -184,8 +184,8 @@ class BayesianHopt:
         """Runs the Bayesian hyperparameter optimization. The results are stored as an attribute.
 
         Args:
-            time_series (pd.DataFrame): the dataset for which to optimize the superparameters
-            show_progressbar (boolean, optional): show bar for the progress of the superoptimization
+            time_series (pd.DataFrame): the dataset for which to optimize the superparameters.
+            show_progressbar (bool, optional): show bar for the progress of the superoptimization.
 
         """
         time_series = pd.DataFrame(time_series)
