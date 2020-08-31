@@ -6,7 +6,7 @@ This python package performs warmstart experiments in the AutoML research domain
 
 Quickstart
 ------------
-We provide a quick-start user example.
+We provide a quick-start user example, applied to the warmstart experiment in the corresponding research (https://repository.tudelft.nl/islandora/object/uuid%3A45ac520d-333f-4122-9efb-0e1bd411fc52).
 ### Environment setup
 Start by cloning the Github repository (https://github.com/JeroenSwart/warmstart) and installing Jupyter Lab, an extensible environment for interactive and reproducible computing. At the bottom of this page you can find a walk-through for setting up the virtual environment and creating an ipython kernel, from which to launch a Jupyter Lab notebook. Firstly the classes are imported from the library.
 
