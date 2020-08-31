@@ -48,7 +48,6 @@ def thesis_search_space():
 
 
 def get_standard_dataset(dataset_name):
-
     # load data
     df = pd.read_csv("../../data/timeseries/raw/final_data.csv", index_col=0)
 
@@ -60,10 +59,17 @@ def get_standard_dataset(dataset_name):
     data = df[[end_name, ex_name] + time_based_features].rename(
         columns={end_name: "endogenous", ex_name: "exogenous"}
     )
-    dataset = data.dropna(subset=["endogenous"])[: int(split_name[2])]
+    dataset = data.dropna(subset=["endogenous"])
+
+    # divide in training and test data
+    start = dataset.index.get_loc("2012-01-01 00:00:00+00:00")
+    train_nr = int(split_name[2])
+    dataset = dataset[start : start + train_nr]
+    dataset.index = pd.DatetimeIndex(dataset.index)
     test_data = data.dropna(subset=["endogenous"])[
-        int(split_name[2]) : int(split_name[2]) + 365 * 24
+        start + train_nr : start + train_nr + 365 * 24
     ]
+    test_data.index = pd.DatetimeIndex(test_data.index)
 
     return dataset, test_data
 

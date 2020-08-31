@@ -80,8 +80,6 @@ class HoptExperiment:
 
         for i, sample in enumerate(samples):
 
-            time_series = sample.time_series
-
             for j in range(len(self._hopts)):
                 self._hopts[j].objective = self._objective(sample.identifier)
 
@@ -89,7 +87,7 @@ class HoptExperiment:
             if len(target_ids) == 1:
                 sample_results = [
                     [
-                        hopt.run_bayesian_hopt(time_series, show_progressbar=False)
+                        hopt.run_bayesian_hopt(sample, show_progressbar=False)
                         for n in tqdm(
                             range(self._duplicates),
                             desc=hopt.identifier + " duplicates",
@@ -100,7 +98,7 @@ class HoptExperiment:
             elif len(target_ids) > 1:
                 sample_results = [
                     [
-                        hopt.run_bayesian_hopt(time_series, show_progressbar=False)
+                        hopt.run_bayesian_hopt(sample, show_progressbar=False)
                         for n in range(self._duplicates)
                     ]
                     for hopt in self._hopts

@@ -53,11 +53,12 @@ class Warmstarter:
     def n_init_configs(self):
         return self._n_init_configs
 
-    def suggest(self, time_series):
+    def suggest(self, sample):
+        # todo: sample has changed from being time_series, update docs
         """Suggests promising pipeline configurations as initialization for the pipeline optimization method.
 
         Args:
-            time_series: the dataset of the task at hand.
+            sample: the dataset of the task at hand.
 
         Returns:
             suggestions (list of dict): the suggested pipeline configurations.
@@ -65,7 +66,7 @@ class Warmstarter:
         """
         # make a metasample
         # todo: why is there no test dataset needed? Metafeatures should be calculated from both train and test set.
-        target_sample = MetaSample("target", time_series, test_dataset=None)
+        target_sample = MetaSample("target", sample.time_series, test_dataset=None)
 
         # standardize metafeatures
         df = self._metadataset.metafeature_set
@@ -95,9 +96,7 @@ class Warmstarter:
         # todo: assert that MetaSamples have different metafeatures, create possibility for 1 metafeature (gives error now)
         sims_df = pd.DataFrame(data=sims, index=self._metadataset.metafeature_set.index)
 
-        # todo: edit this functionality to -> remove the dataset at hand: difference is that different dataset could have equal metafeatures
-        # remove 100% similar dataset from the samples to choose from
-        drop_index = self._metadataset.metafeature_set.index[np.where(sims == 0)[0]]
+        drop_index = pd.Index([sample.identifier])
         sims_diff = sims_df.drop(drop_index)
 
         # get initial set of hyperparameters
