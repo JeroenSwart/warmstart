@@ -1,13 +1,14 @@
 Warmstart
 ==============================
 
-This python package performs warmstart experiments in the AutoML research domain. It performs experiments comparing search strategies such as warmstarted Bayesian optimization, following the formalization of \figref{label:formalization}. We provide a quick-start user example of the experiment of this specific research.
+This python package performs warmstart experiments in the AutoML research domain. The objective of this package is provide the implementation to discover metafeatures for the warmstarting method, and benchmark them reliably to collect evidence for their usefulness.
 
 
 Quickstart
 ------------
+We provide a quick-start user example.
 ### Environment setup
-Start by cloning the Github repository (https://github.com/JeroenSwart/autoxgb) and installing Jupyter Lab, an extensible environment for interactive and reproducible computing. The README file gives a walk-through for setting up the virtual environment and creating an ipython kernel, from which to launch a Jupyter Lab notebook. Firstly the classes are imported from the library.
+Start by cloning the Github repository (https://github.com/JeroenSwart/warmstart) and installing Jupyter Lab, an extensible environment for interactive and reproducible computing. At the bottom of this page you can find a walk-through for setting up the virtual environment and creating an ipython kernel, from which to launch a Jupyter Lab notebook. Firstly the classes are imported from the library.
 
 ```
 # Import external libraries
@@ -26,7 +27,6 @@ from src.utils.thesis_utils import thesis_lookup_objective, thesis_search_space
 
 ### Fixed experiment setting
 We then define the fixed setting of the experiment. A metasample is instantiated with an identifier string, the training dataset, the test dataset and results (a pandas dataframe of pipeline configurations and resulting performance indices). In this example pickle loads prestored instances of metasamples. A metadataset is instantiated with a list of metasamples and a list of metafeature functions, mappings from a dataset to a metafeature. Futhermore the identifier of target datasets, the search space and the objective, which is the mapping from pipeline configuration to the performance index, are defined. The maximum number of iterations for the pipeline optimizations is specified in max\_evals, the number of duplicates is defined and the size of the initialization batch is defined in n_init_configs.
-\newline
 
 ```
 # Initialize metadataset and calculate metafeatures
@@ -43,9 +43,8 @@ duplicates = 2
 n_init_configs = 5
 ```
 
-### Variable experiment setting}
+### Variable experiment setting
 The variable experiment setting defines the compared search strategies. Since the current implementation integrates with the open-source library hyperopt, search strategies are limited to Bayesian optimization (BayesianHopt), which is instantiated with an identifier, search space, objective and a maximum number of iterations. A naive Bayesian hyperoptimization has an initial set of random configurations, defined by nr\_random\_starts. The search strategy is a random search if nr\_random\_starts is set equal to max\_evals.
-\newline
 
 ```
 # initialize search strategies
@@ -66,7 +65,6 @@ naive = BayesianHopt(
 ```
 
 The Bayesian hyperoptimization can be given a warmstarter object, instantiated with the defined metadataset, the number of most similar samples and the number of best configurations per sample and the number of suggested initialization configurations.
-\newline
 
 ```
 warm = BayesianHopt(
@@ -86,7 +84,6 @@ cold = BayesianHopt(
 ```
 
 The experiment is then instantiated by giving it the Bayesian hyperoptimizations and the number of duplicates to average over.
-\newline
 
 ```
 # initialize hyperoptimization experiment
@@ -100,14 +97,12 @@ hopt_exp = HoptExperiment(
 
 ### Results
 Experiment results in a dataframe are added as an attribute by calling the run function on the pipeline optimization experiment.
-\newline
 
 ```
 hopt_exp.run_hopt_experiment(target_ids)
 ```
 
-Several visualizers show the experiment results, for example the averaged performance over duplicates so far, with respect to the amount of iterations of the search strategy, as shown in \figref{fig:vis_ex}.
-\newline
+Several visualizers show the experiment results, for example the averaged performance over duplicates so far, with respect to the amount of iterations of the search strategy.
 
 ```
 hopt_exp.visualize_avg_performance(target_ids[12])
@@ -115,7 +110,7 @@ hopt_exp.visualize_avg_performance(target_ids[12])
 
 ### Instructions for making a notebook kernel
 
-Install the ipython kernel so we have exactly the same packages, versions and extensions!
+Install the ipython kernel so we have exactly the same packages, versions and extensions.
 
 ```
 cd autoxgb
