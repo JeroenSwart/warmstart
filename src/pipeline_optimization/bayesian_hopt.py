@@ -180,15 +180,16 @@ class BayesianHopt:
             "params": real_params,
         }
 
-    def run_bayesian_hopt(self, time_series, show_progressbar=True):
+    def run_bayesian_hopt(self, sample, show_progressbar=True):
+        # todo: update doc definition of sample (it changed from time_series to sample)
         """Runs the Bayesian hyperparameter optimization. The results are stored as an attribute.
 
         Args:
-            time_series (pd.DataFrame): the dataset for which to optimize the superparameters.
+            sample (pd.DataFrame): the dataset for which to optimize the superparameters.
             show_progressbar (bool, optional): show bar for the progress of the superoptimization.
 
         """
-        time_series = pd.DataFrame(time_series)
+        time_series = pd.DataFrame(sample.time_series)
 
         if time_series.empty and self._warmstarter:
             raise ValueError(
@@ -199,7 +200,7 @@ class BayesianHopt:
 
         # Create trials object to store information on optimization process
         if self._warmstarter:
-            warmstart_configs = self._warmstarter.suggest(time_series)
+            warmstart_configs = self._warmstarter.suggest(sample)
             real_space = self.get_numpy_space()
             unit_params = [
                 {

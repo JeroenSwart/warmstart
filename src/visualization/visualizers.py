@@ -43,7 +43,7 @@ def visualize_search_performance(
     if all_losses:
         loss = results.loc[:, ("results", "loss")]
         fig.add_trace(
-            go.Scatter(x=idx, y=loss, mode="markers", name="Iteration result")
+            go.Scatter(x=idx, y=loss, mode="markers", name="Iteration accuracy")
         )
 
     # optionally show the crossvalidation performance
@@ -66,5 +66,9 @@ def visualize_search_performance(
         fig.add_trace(
             go.Scatter(x=idx, y=crossval, mode="markers", name="Crossvalidation result")
         )
+
+    fig.update_layout(
+        xaxis=go.layout.XAxis(title="Iterations"), yaxis=go.layout.YAxis(title="MAE"),
+    )
 
     fig.show()
