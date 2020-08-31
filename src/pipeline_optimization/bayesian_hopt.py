@@ -8,7 +8,7 @@ from hyperopt.fmin import generate_trials_to_calculate
 
 class Config:
     # todo: is configuration the right naming? I mean it as 'one of the set of configurations'. Maybe back to hyperparameters?
-    # todo: change config to superpameter after feedback Peyman.
+    # todo: change config to superparameter after feedback Peyman.
     """A Config is the definition of the search space in one dimension.
 
     This base abstraction is used for compatibility with the variable definitions of search spaces in external packages
